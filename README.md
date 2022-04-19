@@ -1,2 +1,2 @@
 # spring_graphql
-a springbo+graphql+react program
+a springboot+graphql+react program
