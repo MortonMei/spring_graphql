@@ -1,0 +1,7 @@
+spring:
+  # MySql
+  datasource:
+    url: jdbc:mysql://rm-uf6o6c3q6z91lb82h9o.mysql.rds.aliyuncs.com:3306/my-test?serverTimezone=UTC&useUnicode=true&characterEncoding=utf8&useSSL=false
+    username: meijianlin123
+    password: M2010j2010l
+    driver-class-name: com.mysql.cj.jdbc.Driver
