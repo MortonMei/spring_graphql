@@ -1,4 +1,5 @@
 package com.example.spring_graphql.fetcher;
+
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.example.spring_graphql.entity.EventEntity;
 import com.example.spring_graphql.entity.UserEntity;
@@ -8,6 +9,8 @@ import com.example.spring_graphql.type.Event;
 import com.example.spring_graphql.type.EventInput;
 import com.example.spring_graphql.type.User;
 import com.netflix.graphql.dgs.DgsComponent;
+import com.netflix.graphql.dgs.DgsData;
+import com.netflix.graphql.dgs.DgsDataFetchingEnvironment;
 import com.netflix.graphql.dgs.DgsMutation;
 import com.netflix.graphql.dgs.DgsQuery;
 import com.netflix.graphql.dgs.InputArgument;
@@ -30,12 +33,10 @@ public class EventDataFetcher {
     @DgsQuery
     public List<Event> events() {
         List<EventEntity> eventEntityList = eventEntityMapper.selectList(new QueryWrapper<>());
+
         List<Event> eventList = eventEntityList.stream()
-                .map(eventEntity -> {
-                    Event event = Event.fromEventEntity(eventEntity);
-                    fillEventCreator(event, eventEntity.getCreatorId());
-                    return event;
-                }).collect(Collectors.toList());
+                .map(Event:: fromEventEntity).collect(Collectors.toList());
+
         return eventList;
     }
 
@@ -44,12 +45,19 @@ public class EventDataFetcher {
         EventEntity eventEntity = EventEntity.fromEventInput(input);
         eventEntityMapper.insert(eventEntity);
         Event event = Event.fromEventEntity(eventEntity);
-        fillEventCreator(event, eventEntity.getCreatorId());
         return event;
     }
 
-    private void fillEventCreator(Event event, Integer userId) {
-        UserEntity userEntity = userEntityMapper.selectById(userId);
-        event.setCreator(User.fromUserEntity(userEntity));
+    /**
+     * @Author Morton.Mei
+     * @Description: "creator" object resolver at Event
+     * @Date 21:08 2022/4/21
+     */
+    @DgsData(parentType = "Event", field = "creator")
+    public User creator(DgsDataFetchingEnvironment dfe) {
+        Event event = dfe.getSource();
+        UserEntity userEntity = userEntityMapper.selectById(event.getCreatorId());
+        User user = User.fromUserEntity(userEntity);
+        return user;
     }
 }
