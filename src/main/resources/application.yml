@@ -5,3 +5,4 @@ spring:
     username: meijianlin123
     password: M2010j2010l
     driver-class-name: com.mysql.cj.jdbc.Driver
+

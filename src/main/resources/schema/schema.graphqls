@@ -1,9 +1,11 @@
 type Query {
     events: [Event!]
+    users: [User!]
 }
 
 type Mutation {
-    createEvent(eventInput: EventInput!): Event
+    createEvent(eventInput: EventInput!): Event!
+    createUser(userInput: UserInput!): User!
 }
 
 input EventInput {
@@ -11,6 +13,7 @@ input EventInput {
     description: String!
     price: Float!
     date: String!
+    creatorId: Int!
 }
 
 type Event {
@@ -19,4 +22,17 @@ type Event {
     description: String!
     price: Float!
     date: String!
+    creatorId: Int!
+    creator: User!
+}
+
+input UserInput {
+    email: String!
+    password: String!
+}
+
+type User {
+    id: ID!
+    email: String!
+    password: String
 }
