@@ -1,6 +1,7 @@
 package com.example.spring_graphql.fetcher;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.example.spring_graphql.custom.AuthContext;
 import com.example.spring_graphql.entity.EventEntity;
 import com.example.spring_graphql.entity.UserEntity;
 import com.example.spring_graphql.mapper.EventEntityMapper;
@@ -14,6 +15,8 @@ import com.netflix.graphql.dgs.DgsDataFetchingEnvironment;
 import com.netflix.graphql.dgs.DgsMutation;
 import com.netflix.graphql.dgs.DgsQuery;
 import com.netflix.graphql.dgs.InputArgument;
+import com.netflix.graphql.dgs.context.DgsContext;
+import graphql.schema.DataFetchingEnvironment;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
@@ -41,8 +44,12 @@ public class EventDataFetcher {
     }
 
     @DgsMutation
-    public Event createEvent(@InputArgument(name = "eventInput") EventInput input) {
+    public Event createEvent(@InputArgument(name = "eventInput") EventInput input, DataFetchingEnvironment dfe) {
+        AuthContext authContext = DgsContext.getCustomContext(dfe);
+        authContext.ensureAuthenticated();
+
         EventEntity eventEntity = EventEntity.fromEventInput(input);
+        eventEntity.setCreatorId(authContext.getUserEntity().getId());
         eventEntityMapper.insert(eventEntity);
         Event event = Event.fromEventEntity(eventEntity);
         return event;
