@@ -11,7 +11,8 @@ public class User {
     private Integer id;
     private String email;
     private String password;
-    private List<Event> createdEvent = new ArrayList<>();
+    private List<Event> createdEvents = new ArrayList<>();
+    private List<Booking> bookings = new ArrayList<>();
 
     public static User fromUserEntity(UserEntity userEntity) {
         User user = new User();

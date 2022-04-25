@@ -2,11 +2,14 @@ package com.example.spring_graphql.fetcher;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.example.spring_graphql.custom.AuthContext;
+import com.example.spring_graphql.entity.BookingEntity;
 import com.example.spring_graphql.entity.EventEntity;
 import com.example.spring_graphql.entity.UserEntity;
+import com.example.spring_graphql.mapper.BookingEntityMapper;
 import com.example.spring_graphql.mapper.EventEntityMapper;
 import com.example.spring_graphql.mapper.UserEntityMapper;
 import com.example.spring_graphql.type.AuthData;
+import com.example.spring_graphql.type.Booking;
 import com.example.spring_graphql.type.Event;
 import com.example.spring_graphql.type.LoginInput;
 import com.example.spring_graphql.type.User;
@@ -35,6 +38,7 @@ public class UserDataFetcher {
     private final UserEntityMapper userEntityMapper;
     private final EventEntityMapper eventEntityMapper;
     private final PasswordEncoder passwordEncoder;
+    private final BookingEntityMapper bookingEntityMapper;
 
     @DgsQuery
     public AuthData login(@InputArgument LoginInput loginInput) {
@@ -70,10 +74,14 @@ public class UserDataFetcher {
         return userList;
     }
 
-
+    /**
+     * @Author Morton.Mei
+     * @Description: 用户注册
+     * @Date 18:22 2022/4/24
+     */
     @DgsMutation
     public User createUser(@InputArgument UserInput userInput) {
-//      确认用户是否已注册
+//      确认邮箱是否已注册
         if(findUserByEmail(userInput.getEmail()) != null) {
             throw new RuntimeException("该email已经注册过！");
         }
@@ -93,14 +101,26 @@ public class UserDataFetcher {
      * @Date 20:33 2022/4/21
      */
     @DgsData(parentType = "User", field = "createdEvents")
-    public List<Event> createdEvents(DgsDataFetchingEnvironment dgf) {
-        User user = dgf.getSource();
+    public List<Event> createdEvents(DgsDataFetchingEnvironment dfe) {
+        User user = dfe.getSource();
         QueryWrapper<EventEntity> queryWrapper = new QueryWrapper<>();
         queryWrapper.lambda().eq(EventEntity::getCreatorId, user.getId());
         List<EventEntity> eventEntityList = eventEntityMapper.selectList(queryWrapper);
         List<Event> eventList = eventEntityList.stream()
                 .map(Event::fromEventEntity).collect(Collectors.toList());
         return eventList;
+    }
+
+    @DgsData(parentType = "User", field = "bookings")
+    public List<Booking> bookings(DgsDataFetchingEnvironment dfe) {
+        User user = dfe.getSource();
+        QueryWrapper<BookingEntity> queryWrapper = new QueryWrapper<>();
+        queryWrapper.lambda().eq(BookingEntity::getUserId, user.getId());
+        List<Booking> bookingList = bookingEntityMapper.selectList(queryWrapper)
+                .stream()
+                .map(Booking::fromBookingEntity)
+                .collect(Collectors.toList());
+        return bookingList;
     }
 
     public void ensureUserNotExists(UserInput userInput) {

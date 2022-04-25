@@ -10,7 +10,7 @@ import lombok.Data;
 import java.util.Date;
 
 @Data
-@TableName(value = "event")
+@TableName(value = "tb_event")
 public class EventEntity {
     @TableId(type = IdType.AUTO)
     private Integer id;
@@ -25,7 +25,7 @@ public class EventEntity {
         eventEntity.setTitle(input.getTitle());
         eventEntity.setDescription(input.getDescription());
         eventEntity.setPrice(input.getPrice());
-        eventEntity.setDate(DateUtil.convertISOStringToDate(input.getDate()));
+        eventEntity.setDate(new Date());
         return eventEntity;
     }
 
